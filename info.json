@@ -1,0 +1,32 @@
+{
+  "expense": {
+    "a": "amount",
+    "r": "reason",
+    "c": "category",
+    "d": "date"
+  },
+
+  "finance": {
+    "n": "name",
+    "c": "category",
+    "a": "amount",
+    "ty": "type",
+    "md": "maturityDate",
+    "lp": "lockPeriod",
+    "rt": "returns",
+    "no": "notes"
+  },
+
+  "todo": {
+    "t": "task",
+    "c": "category",
+    "ti": "time",
+    "da": "date",
+    "p": "priority",
+    "s": "status"
+  },
+
+  "category": {
+    "n": "name"
+  }
+}

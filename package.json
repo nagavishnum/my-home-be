@@ -1,0 +1,28 @@
+{
+  "name": "my-home-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.ts",
+  "scripts": {
+    "dev": "nodemon --watch . --ext ts,js --exec tsx app.ts",
+    "start": "tsx app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "mongoose": "^9.6.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.1",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  }
+}
