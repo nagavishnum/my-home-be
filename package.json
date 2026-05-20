@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
+    "build": "tsc",
     "dev": "nodemon --watch . --ext ts,js --exec tsx app.ts",
     "start": "tsx app.ts"
   },
