@@ -1,26 +1,31 @@
-import express from 'express';
-import todo from '../models/todo';
-import { asyncHandler } from '../middleware/asyncHandler';
-import { validateId, validateBody } from '../middleware/validate';
-const router = express.Router();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const todo_1 = __importDefault(require("../models/todo"));
+const asyncHandler_1 = require("../middleware/asyncHandler");
+const validate_1 = require("../middleware/validate");
+const router = express_1.default.Router();
 const DEFAULT_LIMIT = 50;
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || DEFAULT_LIMIT, 200);
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-        todo.find()
+        todo_1.default.find()
             .sort({ da: -1 })
             .skip(skip)
             .limit(limit)
             .lean(),
-        todo.countDocuments(),
+        todo_1.default.countDocuments(),
     ]);
     res.json({ data, total, page, limit });
 }));
-router.post('/', validateBody(['t', 'da', 'p']), asyncHandler(async (req, res) => {
+router.post('/', (0, validate_1.validateBody)(['t', 'da', 'p']), (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const { t, ti, da, p, s } = req.body;
-    const data = await todo.create({
+    const data = await todo_1.default.create({
         t: String(t).trim(),
         ti: ti ? String(ti) : '',
         da,
@@ -29,7 +34,7 @@ router.post('/', validateBody(['t', 'da', 'p']), asyncHandler(async (req, res) =
     });
     res.status(201).json(data);
 }));
-router.put('/:id', validateId, asyncHandler(async (req, res) => {
+router.put('/:id', validate_1.validateId, (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const allowed = {};
     if (req.body.t !== undefined)
         allowed.t = String(req.body.t).trim();
@@ -41,19 +46,19 @@ router.put('/:id', validateId, asyncHandler(async (req, res) => {
         allowed.p = req.body.p;
     if (req.body.s !== undefined)
         allowed.s = Boolean(req.body.s);
-    const data = await todo.findByIdAndUpdate(req.params.id, allowed, { new: true }).lean();
+    const data = await todo_1.default.findByIdAndUpdate(req.params.id, allowed, { new: true }).lean();
     if (!data) {
         res.status(404).json({ error: 'Not found' });
         return;
     }
     res.json(data);
 }));
-router.delete('/:id', validateId, asyncHandler(async (req, res) => {
-    const result = await todo.findByIdAndDelete(req.params.id);
+router.delete('/:id', validate_1.validateId, (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const result = await todo_1.default.findByIdAndDelete(req.params.id);
     if (!result) {
         res.status(404).json({ error: 'Not found' });
         return;
     }
     res.json({ ok: true });
 }));
-export default router;
+exports.default = router;
