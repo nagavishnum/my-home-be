@@ -31,7 +31,72 @@ router.post('/', validateBody(['a', 'r', 'c', 'd']), asyncHandler(async (req, re
   const populated = await data.populate('c', 'n');
   res.status(201).json(populated);
 }));
+router.put('/:id', validateId, asyncHandler(async (req, res) => {
+  const { a, r, c, d } = req.body;
 
+  const updated = await expenses.findByIdAndUpdate(
+    req.params.id,
+    {
+      a: Number(a),
+      r: String(r).trim(),
+      c,
+      d
+    },
+    { new: true }
+  ).populate('c', 'n');
+
+  if (!updated) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
+  res.json(updated);
+}));
+
+router.delete('/bulk', asyncHandler(async (req, res) => {
+  const { type, value } = req.query;
+
+  if (!type || !value) {
+    res.status(400).json({ error: 'type and value required' });
+    return;
+  }
+
+  let start: Date | undefined;
+  let end: Date | undefined;
+
+  const date = new Date(String(value));
+
+  if (type === 'day') {
+    start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+  }
+
+  if (type === 'month') {
+    start = new Date(date.getFullYear(), date.getMonth(), 1);
+    end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+  }
+
+  if (type === 'year') {
+    start = new Date(date.getFullYear(), 0, 1);
+    end = new Date(date.getFullYear(), 11, 31, 23, 59, 59, 999);
+  }
+
+  if (!start || !end) {
+    res.status(400).json({ error: 'Invalid type' });
+    return;
+  }
+
+  const result = await expenses.deleteMany({
+    d: { $gte: start, $lte: end }
+  });
+
+  res.json({
+    deleted: result.deletedCount
+  });
+}));
 router.delete('/:id', validateId, asyncHandler(async (req, res) => {
   const result = await expenses.findByIdAndDelete(req.params.id);
   if (!result) { res.status(404).json({ error: 'Not found' }); return; }

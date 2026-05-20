@@ -25,27 +25,45 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 router.post('/', validateBody(['t', 'da', 'p']), asyncHandler(async (req, res) => {
-  const { t, ti, da, p, s } = req.body;
+  const { t, da, p } = req.body;
   const data = await todo.create({
     t: String(t).trim(),
-    ti: ti ? String(ti) : '',
     da,
     p: p as 'low' | 'medium' | 'high' | 'mandatory',
-    s: Boolean(s) || false,
   });
   res.status(201).json(data);
 }));
 
 router.put('/:id', validateId, asyncHandler(async (req, res) => {
-  const allowed: Record<string, unknown> = {};
-  if (req.body.t !== undefined) allowed.t = String(req.body.t).trim();
-  if (req.body.ti !== undefined) allowed.ti = String(req.body.ti);
-  if (req.body.da !== undefined) allowed.da = req.body.da;
-  if (req.body.p !== undefined) allowed.p = req.body.p as 'low' | 'medium' | 'high' | 'mandatory';
-  if (req.body.s !== undefined) allowed.s = Boolean(req.body.s);
+  const allowed: Partial<{
+    t: string;
+    da: Date;
+    p: 'low' | 'medium' | 'high' | 'mandatory';
+  }> = {};
 
-  const data = await todo.findByIdAndUpdate(req.params.id, allowed, { new: true }).lean();
-  if (!data) { res.status(404).json({ error: 'Not found' }); return; }
+  if (req.body.t !== undefined) {
+    allowed.t = String(req.body.t).trim();
+  }
+
+  if (req.body.da !== undefined) {
+    allowed.da = req.body.da;
+  }
+
+  if (req.body.p !== undefined) {
+    allowed.p = req.body.p;
+  }
+
+  const data = await todo.findByIdAndUpdate(
+    req.params.id,
+    allowed,
+    { new: true }
+  ).lean();
+
+  if (!data) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
   res.json(data);
 }));
 
