@@ -6,7 +6,7 @@ import { CategoryType } from '../types/common';
 
 const router = express.Router();
 
-const VALID_TYPES: CategoryType[] = ['expense', 'finance', 'todo'];
+const VALID_TYPES: CategoryType[] = ['expense', 'finance', 'todo','goal'];
 
 router.get('/:cattype', asyncHandler(async (req, res) => {
   const cattype = req.params.cattype as CategoryType;

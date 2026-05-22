@@ -10,6 +10,9 @@ import expenseRoutes from './src/routes/expenses';
 import financeRoutes from './src/routes/financebook';
 import todoRoutes from './src/routes/todo';
 import categoryRoutes from './src/routes/categories';
+import authRoutes from './src/routes/auth';
+import goalRoutes from './src/routes/goals';
+import { auth } from './src/middleware/auth';
 
 if (!process.env.MONGO_URI) {
   console.error('MONGO_URI is required');
@@ -34,18 +37,20 @@ app.use(express.json({ limit: '1mb' }));
 
 connectDB()
   .then(() => {
-    app.use('/expenses', expenseRoutes);
-    app.use('/finance', financeRoutes);
-    app.use('/todos', todoRoutes);
-    app.use('/categories', categoryRoutes);
+
+    // PUBLIC
+    app.use('/auth', authRoutes);
+
+    // PRIVATE
+    app.use('/expenses', auth, expenseRoutes);
+    app.use('/finance', auth, financeRoutes);
+    app.use('/todos', auth, todoRoutes);
+    app.use('/categories', auth, categoryRoutes);
+    app.use('/goal', auth, goalRoutes);
 
     app.use(errorHandler);
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`Server running on ${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error("DB connection failed", err);
-    process.exit(1);
   });

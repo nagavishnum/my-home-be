@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const categorySchema = new mongoose.Schema(
   {
     n: { type: String, required: true, trim: true },
-    t: { type: String, required: true, enum: ['expense', 'finance', 'todo'] }
+    t: { type: String, required: true, enum: ['expense', 'finance', 'todo','goal'] }
   },
   { timestamps: false, versionKey: false }
 );

@@ -1,1 +1,1 @@
-export type CategoryType = 'expense' | 'finance' | 'todo';
+export type CategoryType = 'expense' | 'finance' | 'todo' | 'goal';

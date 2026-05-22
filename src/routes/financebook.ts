@@ -25,25 +25,174 @@ router.get('/', asyncHandler(async (req, res) => {
   res.json({ data, total, page, limit });
 }));
 
-router.post('/', validateBody(['n', 'a', 'c', 'ty', 'md']), asyncHandler(async (req, res) => {
-  const { n, a, c, ty, md, lp, rt, cv, no } = req.body;
-  const amount = Number(a);
-  const body = {
-    n: String(n).trim(),
-    a: amount,
-    c,
-    ty: ty as 'Monthly' | 'OneTime',
-    md,
-    lp: Number(lp) || 0,
-    rt: Number(rt) || 0,
-    cv: Number(cv) || amount,
-    no: no ? String(no).trim() : '',
-  };
-  const data = await financebook.create(body);
-  const populated = await data.populate('c', 'n');
-  res.status(201).json(populated);
-}));
+router.post(
+  '/',
+  validateBody([
+    'n',
+    'a',
+    'c',
+    'ty',
+    'md',
+  ]),
+  asyncHandler(async (req, res) => {
+    const {
+      n,
+      a,
+      sv,
+      c,
+      ty,
+      md,
+      lp,
+      rt,
+      cv,
+      no,
+    } = req.body;
 
+    const amount =
+      Number(a) || 0;
+
+    const sipValue =
+      Number(sv) || 0;
+
+    const currentValue =
+      Number(cv) ||
+      amount;
+
+    const body = {
+      n: String(n).trim(),
+
+      a: amount,
+
+      sv:
+        ty === 'Monthly'
+          ? sipValue
+          : 0,
+
+      c,
+
+      ty: ty as
+        | 'Monthly'
+        | 'OneTime',
+
+      md,
+
+      lp: Number(lp) || 0,
+
+      rt: Number(rt) || 0,
+
+      cv: currentValue,
+
+      no: no
+        ? String(no).trim()
+        : '',
+    };
+
+    const data =
+      await financebook.create(
+        body
+      );
+
+    const populated =
+      await data.populate(
+        'c',
+        'n'
+      );
+
+    res
+      .status(201)
+      .json(populated);
+  })
+);
+
+router.put(
+  '/:id',
+
+  validateId,
+
+  validateBody([
+    'n',
+    'a',
+    'c',
+    'ty',
+    'md',
+  ]),
+
+  asyncHandler(async (req, res) => {
+    const {
+      n,
+      a,
+      sv,
+      c,
+      ty,
+      md,
+      lp,
+      rt,
+      cv,
+      no,
+    } = req.body;
+
+    const amount =
+      Number(a) || 0;
+
+    const sipValue =
+      Number(sv) || 0;
+
+    const currentValue =
+      Number(cv) ||
+      amount;
+
+    const body = {
+      n: String(n).trim(),
+
+      a: amount,
+
+      sv:
+        ty === 'Monthly'
+          ? sipValue
+          : 0,
+
+      c,
+
+      ty: ty as
+        | 'Monthly'
+        | 'OneTime',
+
+      md,
+
+      lp: Number(lp) || 0,
+
+      rt: Number(rt) || 0,
+
+      cv: currentValue,
+
+      no: no
+        ? String(no).trim()
+        : '',
+    };
+
+    const updated =
+      await financebook
+        .findByIdAndUpdate(
+          req.params.id,
+          body,
+          {
+            new: true,
+            runValidators: true,
+          }
+        )
+        .populate('c', 'n');
+
+    if (!updated) {
+      res.status(404).json({
+        error: 'Not found',
+      });
+
+      return;
+    }
+
+    res.json(updated);
+  })
+);
 router.delete('/:id', validateId, asyncHandler(async (req, res) => {
   const result = await financebook.findByIdAndDelete(req.params.id);
   if (!result) { res.status(404).json({ error: 'Not found' }); return; }
