@@ -25,20 +25,19 @@ router.get('/', asyncHandler(async (req, res) => {
   res.json({ data, total, page, limit });
 }));
 
-router.post('/', validateBody(['a', 'r', 'c', 'd']), asyncHandler(async (req, res) => {
-  const { a, r, c, d } = req.body;
-  const data = await expenses.create({ a: Number(a), r: String(r).trim(), c, d });
+router.post('/', validateBody(['a', 'c', 'd']), asyncHandler(async (req, res) => {
+  const { a, c, d } = req.body;
+  const data = await expenses.create({ a: Number(a), c, d });
   const populated = await data.populate('c', 'n');
   res.status(201).json(populated);
 }));
 router.put('/:id', validateId, asyncHandler(async (req, res) => {
-  const { a, r, c, d } = req.body;
+  const { a, c, d } = req.body;
 
   const updated = await expenses.findByIdAndUpdate(
     req.params.id,
     {
       a: Number(a),
-      r: String(r).trim(),
       c,
       d
     },

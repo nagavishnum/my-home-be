@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
   try {
     const { u, p } = req.body;
 
-    const user = await User.findOne({ u });
+    const user = await User.findOne({ u: String(u).trim() });
 
     if (!user) {
       res.status(400).json({ error: 'Invalid credentials' });
@@ -66,9 +66,10 @@ router.post('/login', async (req, res) => {
     );
 
     res.json({ token,username: user.u  });
-  } catch {
-    res.status(500).json({ error: 'Server error' });
-  }
+  } catch (err) {
+  console.error("AUTH ERROR:", err);
+  res.status(500).json({ error: 'Server error' });
+}
 });
 
 export default router;
