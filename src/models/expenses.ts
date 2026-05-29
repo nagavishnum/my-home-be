@@ -9,6 +9,9 @@ const expensesSchema = new mongoose.Schema(
     { timestamps: false, versionKey: false }
 );
 
-expensesSchema.index({ d: -1 });
+expensesSchema.index({
+  d: 1,
+  c: 1
+});
 
 export default mongoose.model('Expense', expensesSchema);
