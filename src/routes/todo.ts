@@ -2,6 +2,7 @@ import express from 'express';
 import todo from '../models/todo';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { validateId, validateBody } from '../middleware/validate';
+import dailytodo from '../models/dailytodo';
 
 const router = express.Router();
 
@@ -73,4 +74,83 @@ router.delete('/:id', validateId, asyncHandler(async (req, res) => {
   res.json({ ok: true });
 }));
 
+router.get("/dailytodo", async (req, res) => {
+    try {
+        const todos = await dailytodo.find().sort({ _id: -1 });
+
+        res.status(200).json(todos);
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to fetch todos"
+        });
+    }
+});
+router.post("/dailytodo", async (req, res) => {
+    try {
+        const { t } = req.body;
+
+        const todo = await dailytodo.create({
+            t,
+          
+        });
+
+        res.status(201).json(todo);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            message: "Failed to create daily todo",
+        });
+    }
+});
+router.put("/dailytodo/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { t } = req.body;
+
+        const updatedTodo =
+            await dailytodo.findByIdAndUpdate(
+                id,
+                {
+                    t,
+                },
+                {
+                    new: true,
+                }
+            );
+
+        if (!updatedTodo) {
+            return res.status(404).json({
+                message: "Todo not found",
+            });
+        }
+
+        res.status(200).json(updatedTodo);
+    } catch (err) {
+        res.status(500).json({
+            message: "Failed to update todo",
+        });
+    }
+});
+router.delete("/dailytodo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedTodo = await dailytodo.findByIdAndDelete(id);
+
+    if (!deletedTodo) {
+      return res.status(404).json({
+        message: "Todo not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Todo deleted successfully",
+      deletedTodo,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to delete todo",
+    });
+  }
+});
 export default router;

@@ -215,6 +215,7 @@ categoryName:
 router.post(
   '/compress',
   asyncHandler(async (req, res) => {
+try{
 
     const rawExpenses =
       await expenses.find().lean();
@@ -386,8 +387,11 @@ router.post(
       deleted:
         deleted.deletedCount
     });
-
+  }catch(e){
+    console.log(e,"err")
+  }
   })
+
 );
 
 export default router;
