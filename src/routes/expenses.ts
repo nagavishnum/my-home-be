@@ -102,116 +102,7 @@ router.delete('/:id', validateId, asyncHandler(async (req, res) => {
   if (!result) { res.status(404).json({ error: 'Not found' }); return; }
   res.json({ ok: true });
 }));
-router.get(
-  '/dashboard',
-  asyncHandler(async (req, res) => {
 
-    const year =
-      Number(req.query.year);
-
-    const month =
-      Number(req.query.month);
-
-    if (!year || !month) {
-
-      res.status(400).json({
-        error: 'year and month required'
-      });
-
-      return;
-    }
-
-    // --------------------------------
-    // YEAR TOTAL EXPENSE
-    // --------------------------------
-
-    const totalExpenseResult =
-      await expensesummary.aggregate([
-
-        {
-          $match: {
-            y: year
-          }
-        },
-
-        {
-          $group: {
-
-            _id: null,
-
-            total: {
-              $sum: '$t'
-            }
-          }
-        }
-
-      ]);
-
-    const totalExpenseValue =
-      totalExpenseResult[0]?.total || 0;
-
-    // --------------------------------
-    // MONTH SUMMARY
-    // --------------------------------
-
-    const monthSummary =
-      await expensesummary
-      .findOne({
-
-        y: year,
-
-        m: month
-
-      })
-      .populate('c._id', 'n')
-      .lean();
-
-    if (!monthSummary) {
-
-      res.json({
-
-        totalExpenseValue,
-
-        selectedMonthExpenseValue: 0,
-
-        categoryTotals: []
-      });
-
-      return;
-    }
-
-    // --------------------------------
-    // CATEGORY TOTALS
-    // --------------------------------
-
-    const categoryTotals =
-      monthSummary.c.map(item => ({
-
-categoryId:
-  (item._id as any)?._id,
-
-categoryName:
-  (item._id as any)?.n,
-
-        amount:
-          item.a
-      }));
-
-    res.json({
-
-      // full year total
-      totalExpenseValue,
-
-      // selected month total
-      selectedMonthExpenseValue:
-        monthSummary.t,
-
-      // selected month category totals
-      categoryTotals
-    });
-
-  })
-);
 router.post(
   '/compress',
   asyncHandler(async (req, res) => {
@@ -394,4 +285,52 @@ try{
 
 );
 
+router.get(
+  '/yearly-summary',
+  asyncHandler(async (req, res) => {
+    const year = Number(req.query.year);
+
+    if (!year || !Number.isInteger(year)) {
+      res.status(400).json({
+        error: 'Valid year is required'
+      });
+      return;
+    }
+
+    const summaries = await expensesummary
+      .find({ y: year })
+      .populate('c._id', 'n')
+      .sort({ m: 1 })
+      .lean();
+
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+
+    const months = summaries.map(summary => ({
+      m: monthNames[summary.m - 1],
+      t: summary.t,
+      c: summary.c.map(category => ({
+        n: (category._id as any)?.n,
+        a: category.a
+      }))
+    }));
+
+    res.json({
+      year,
+      months
+    });
+  })
+);
 export default router;
