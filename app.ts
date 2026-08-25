@@ -8,6 +8,7 @@ import { errorHandler } from './src/middleware/errorHandler';
 
 import expenseRoutes from './src/routes/expenses';
 import financeRoutes from './src/routes/financebook';
+import financeSnapshotRouter from './src/routes/financeSnapshot';
 import todoRoutes from './src/routes/todo';
 import categoryRoutes from './src/routes/categories';
 import authRoutes from './src/routes/auth';
@@ -47,7 +48,10 @@ connectDB()
     app.use('/todos', auth, todoRoutes);
     app.use('/categories', auth, categoryRoutes);
     app.use('/goal', auth, goalRoutes);
-
+app.use(
+  '/finance-snapshots',
+  financeSnapshotRouter,
+);
     app.use(errorHandler);
 
     app.listen(PORT, () => {
